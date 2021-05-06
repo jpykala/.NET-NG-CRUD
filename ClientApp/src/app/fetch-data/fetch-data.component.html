@@ -1,0 +1,139 @@
+<p-toast></p-toast>
+<h1 id="tableLabel">Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+<p *ngIf="!forecasts"><em>Loading...</em></p>
+<h2>Add new forecast</h2>
+<div class="p-formgroup-inline">
+  <div class="p-field">
+    <label >Date</label>
+    <p-calendar [(ngModel)]="date" [showTime]="true" ></p-calendar>
+  </div>
+    <div class="p-field-radiobutton p-md-2">
+      <p-radioButton name="tempUnit" value="Celsius" [(ngModel)]="tempUnit" ></p-radioButton>
+      <label for="c">Celsius</label>
+    </div>
+  <div class="p-field-radiobutton p-md-2">
+      <p-radioButton name="tempUnit" value="Farenheit" [(ngModel)]="tempUnit" ></p-radioButton>
+      <label >Farenheit</label>
+  </div>
+  <div class="p-field">
+    <label style="margin-top:5px">Temperature </label>
+    <input type="number" [(ngModel)]="inputTemp" style="margin: 5px 30px 0px 10px">
+</div>
+</div>
+<div class="p-formgroup-inline">
+  <div class="p-field">
+    <label >City</label>
+    <p-dropdown style="margin-left:5px" [options]="cities" optionLabel="name" [(ngModel)]="selectedCity" optionDisabled="inactive" placeholder="Select"></p-dropdown>
+    <button pButton (click)="op.toggle($event)" type="button" icon="pi pi-plus" iconPos="left"></button>
+
+    <p-overlayPanel showCloseIcon="true" #op>
+      <ng-template pTemplate>
+        <div class="p-formgroup-inline">
+          <div class="p-field"><label style="margin-top:5px">Add City</label>
+          <input style="margin-left:5px" type="text" pInputText [(ngModel)]="newCityName"/></div>
+          <div class="p-field"><p-button label="save" (onClick)="createCity()"></p-button></div>
+    </div>
+      </ng-template> 
+  </p-overlayPanel>
+
+  </div>
+
+  <div class="p-field">
+    <label >Wind</label>
+    <p-inputNumber [(ngModel)]="inputWind"  suffix="m/s" :min="0"></p-inputNumber>
+  </div>
+  <div class="p-field">
+    <label >Rain</label>
+    <p-inputNumber [(ngModel)]="inputRain" suffix="mm" :min="0"></p-inputNumber>
+  </div>
+  <p-button label="Add" (onClick)="createForecast()"></p-button>
+</div>
+
+<p-table [columns]="cols" [value]="forecasts" [autoLayout]="true">
+  <ng-template pTemplate="caption">
+      Saved Forecasts
+  </ng-template>
+  <ng-template pTemplate="header" let-columns>
+      <tr>
+          <th *ngFor="let col of columns">
+              {{col.header}}
+          </th>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-forecast>
+      <tr>
+        <td pEditableColumn>
+					<p-cellEditor>
+						<ng-template pTemplate="input">
+							<p-dropdown [options]="cities"  optionLabel="name" [(ngModel)]="forecast.city"
+								></p-dropdown>
+						</ng-template>
+						<ng-template pTemplate="output">{{forecast.city}}</ng-template>
+					</p-cellEditor>
+				</td>
+        <td pEditableColumn>
+          <p-cellEditor>
+              <ng-template pTemplate="input">
+                <p-calendar dateFormat="YYYY-MM-DD" showButtonBar="true" [ngModelOptions]="{standalone: true}"  appendTo="body" [(ngModel)]="forecast.date" [showTime]="true" ></p-calendar>
+              </ng-template>
+              <ng-template pTemplate="output">
+                  {{forecast.date}}
+              </ng-template>
+          </p-cellEditor>
+        </td>
+
+        <td pEditableColumn>
+          <p-cellEditor>
+              <ng-template pTemplate="input">
+                <input type="number" [(ngModel)]="forecast.temperatureC" (input)="onCelsUpdate(forecast)" style="margin: 5px 30px 0px 10px">
+              </ng-template>
+              <ng-template pTemplate="output">
+                  {{forecast.temperatureC}}
+              </ng-template>
+          </p-cellEditor>
+       </td>
+
+       <td pEditableColumn>
+        <p-cellEditor>
+            <ng-template pTemplate="input">
+              <input type="number" [(ngModel)]="forecast.temperatureF" (input)="onFarUpdate(forecast)" style="margin: 5px 30px 0px 10px">
+            </ng-template>
+            <ng-template pTemplate="output">
+                {{forecast.temperatureF}}
+            </ng-template>
+        </p-cellEditor>
+        </td>
+
+        <td pEditableColumn>
+          <p-cellEditor>
+              <ng-template pTemplate="input">
+                  <p-inputNumber  suffix="m/s" [(ngModel)]="forecast.wind"></p-inputNumber>
+              </ng-template>
+              <ng-template pTemplate="output">
+                  {{forecast.wind}}
+              </ng-template>
+          </p-cellEditor>
+        </td>
+
+        <td pEditableColumn>
+          <p-cellEditor>
+              <ng-template pTemplate="input">
+                  <p-inputNumber suffix="mm" [(ngModel)]="forecast.rain"></p-inputNumber>
+              </ng-template>
+              <ng-template pTemplate="output">
+                  {{forecast.rain}}
+              </ng-template>
+          </p-cellEditor>
+        </td>
+        <td>
+          <button (click)="updateForecast(forecast)" pButton pRipple icon="pi pi-save" class="p-button-rounded p-button-success p-mr-2"></button>
+          <button (click)="deleteForecast(forecast)" pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" ></button>
+        </td>
+      </tr>
+  </ng-template>
+</p-table>
+
+
