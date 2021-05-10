@@ -72,6 +72,13 @@ namespace fuusorcodesample.Controllers
             return NoContent();
         }
 
+        [HttpDelete]
+        public IActionResult Delete()
+        {
+            _weatherForecastService.Remove();
+            return NoContent();
+        }
+
     }
 }
 

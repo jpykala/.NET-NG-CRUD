@@ -16,7 +16,7 @@ namespace fuusorcodesample.Services
             var database = client.GetDatabase(settings.DatabaseName);
             _forecastCollection = database.GetCollection<WeatherForecast>(settings.ForecastCollectionName);
         }
-        public List<WeatherForecast> Get() => _forecastCollection.Find(forecast => true).ToList();
+        public List<WeatherForecast> Get() => _forecastCollection.Find(forecast => true).Sort(Builders<WeatherForecast>.Sort.Ascending("date")).ToList();
 
         public WeatherForecast Get(string id) =>
             _forecastCollection.Find<WeatherForecast>(forecast => forecast.Id == id).FirstOrDefault();
@@ -28,7 +28,11 @@ namespace fuusorcodesample.Services
         }
         public void Update(string id, WeatherForecast forecastIn) =>
                     _forecastCollection.ReplaceOne(forecast => forecast.Id == id, forecastIn);
-         public void Remove(string id) => 
+        public void Remove(string id) => 
             _forecastCollection.DeleteOne(forecast => forecast.Id == id);
+
+        public void Remove() => 
+            _forecastCollection.DeleteMany(forecast => true);
+
     }
 }

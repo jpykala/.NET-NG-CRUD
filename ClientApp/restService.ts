@@ -29,6 +29,22 @@ export class RestService {
       catchError(this.handleError)
     )
   }
+  deleteAllCities(){
+    return this.http.delete<any>(this.baseUrl + 'city', this.httpOptions)
+    .pipe(
+      retry(1),
+      catchError(this.handleError)
+    )
+  }
+
+  deleteAllForecasts(){
+    return this.http.delete<any>(this.baseUrl + 'weatherforecast', this.httpOptions)
+    .pipe(
+      retry(1),
+      catchError(this.handleError)
+    )
+  }
+  
 
   getCities(): Observable<any> {
       return this.http.get<any>(this.baseUrl + 'city')

@@ -29,5 +29,8 @@ namespace fuusorcodesample.Services
         }
         public void Remove(string id) => 
             _cityCollection.DeleteOne(city => city.Id == id);
+        
+        public void Remove() =>
+            _cityCollection.DeleteMany(city => true);
     }
 }

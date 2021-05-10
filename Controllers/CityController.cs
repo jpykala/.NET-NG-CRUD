@@ -52,5 +52,13 @@ namespace fuusorcodesample.Controllers
 
             return NoContent();
         }
+
+        [HttpDelete]
+        public IActionResult Delete() 
+        {
+            _cityService.Remove();
+            return NoContent();
+        }
+        
     }
 }
