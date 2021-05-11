@@ -2,8 +2,8 @@ import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {MessageService} from 'primeng/api';
 import { RestService } from 'restService';
-import { forkJoin, Observable } from 'rxjs';
-import { filter, find } from 'rxjs/operators';
+import { forkJoin, Subscription } from 'rxjs';
+
 
 interface WeatherForecast {
   date: Date
@@ -18,11 +18,6 @@ interface WeatherForecast {
 interface City {
   name: string
   id?: string
-}
-
-interface CityData{
-  city: string
-  data?: Array<number>
 }
 
 interface DataSet {
@@ -43,6 +38,8 @@ interface ChartData {
 })
 export class FetchDataComponent implements OnInit, OnDestroy{
 
+  subscriptions: Subscription[] = []
+
   //List data from db
   forecasts: WeatherForecast[];
   cities: City[]
@@ -59,7 +56,7 @@ export class FetchDataComponent implements OnInit, OnDestroy{
 
   
 
-  //Models for POST
+  //Object models for HTTP requests
   newCity: City
   selectedCity: City;
   newForecast: WeatherForecast;
@@ -101,6 +98,7 @@ export class FetchDataComponent implements OnInit, OnDestroy{
       { value: 'Wind', property: 'wind'},
       { value: 'Rain', property: 'rain'}
     ]
+
     this.filterUuc = this.uuc[0].property
 
     this.chartOptions = {
@@ -116,29 +114,30 @@ export class FetchDataComponent implements OnInit, OnDestroy{
   
   }
   ngOnDestroy(): void {
+    this.subscriptions.forEach(sub => sub.unsubscribe())
   }
 
-
-
   ngOnInit(): void {
-   forkJoin([
-      this.getForecasts(),
-      this.getCities()
-    ]).subscribe(resp => {
-      this.forecasts = resp[0]
-      this.cities = resp[1]
-      if(this.cities.length > 0){
-        this.filterCity = this.cities[0].name
-      }
-      this.forecasts.forEach(element => {
-        element.date = new Date(element.date)
+    this.subscriptions.push(
+      forkJoin([
+        this.getForecasts(),
+        this.getCities()
+      ]).subscribe(resp => {
+        this.forecasts = resp[0]
+        this.cities = resp[1]
+        if(this.cities.length > 0){
+          this.filterCity = this.cities[0].name
+        }
+        this.forecasts.forEach(element => {
+          element.date = new Date(element.date)
+        })
+        console.log(this.forecasts)
+        console.log(this.cities)
+      }, error => {
+        this.showError('Error loading data')
+        console.error(error)
       })
-      console.log(this.forecasts)
-      console.log(this.cities)
-    }, error => {
-      this.showError('Error loading data')
-      console.error(error)
-    })
+    )
   }
 
 /**
@@ -177,7 +176,7 @@ export class FetchDataComponent implements OnInit, OnDestroy{
 
 
 /**
- * Function for ForkJoin
+ * Functions for ForkJoin
  */
   getForecasts(){
     return this.restService.getForecasts()
@@ -237,17 +236,17 @@ export class FetchDataComponent implements OnInit, OnDestroy{
         wind: this.inputWind,
         rain: this.inputRain,
       }
-      
-      this.restService.createForecast(this.newForecast).subscribe(resp => {
-        resp.date = new Date(resp.date)
-        this.forecasts.push(resp)
-        this.showSuccess('Forecast saved succesfully')
-        this.clearInputs();
-      }, error => {
-        this.showError('Error saving forecast')
-        console.log(error)
-      })
-      
+      this.subscriptions.push(
+        this.restService.createForecast(this.newForecast).subscribe(resp => {
+          resp.date = new Date(resp.date)
+          this.forecasts.push(resp)
+          this.showSuccess('Forecast saved succesfully')
+          this.clearInputs();
+        }, error => {
+          this.showError('Error saving forecast')
+          console.log(error)
+        })
+      )
   }
 
   createCity(){
@@ -255,28 +254,27 @@ export class FetchDataComponent implements OnInit, OnDestroy{
     this.newCity = {
       name: this.newCityName
     }
-
-    this.restService.createCity(this.newCity).subscribe(resp => {
-      this.cities.push(resp)
-      this.showSuccess(this.newCity.name + ' added to cities')
-      this.clearCityInput()
-    }, error => {
-      this.showError('Error adding city')
-      console.log(error)
-    })
-    
+    this.subscriptions.push(
+      this.restService.createCity(this.newCity).subscribe(resp => {
+        this.cities.push(resp)
+        this.showSuccess(this.newCity.name + ' added to cities')
+        this.clearCityInput()
+      }, error => {
+        this.showError('Error adding city')
+        console.log(error)
+      })
+    )
   }
 
   updateForecast(forecast){
-    console.log(forecast)
-
-    this.restService.updateForecast(forecast).subscribe(resp => {
-      this.showSuccess('Forecast updated')
-    }, error => {
-      console.log(error)
-      this.showError('Error on updating forecast')
-    })
-    
+    this.subscriptions.push(
+      this.restService.updateForecast(forecast).subscribe(resp => {
+        this.showSuccess('Forecast updated')
+      }, error => {
+        console.log(error)
+        this.showError('Error on updating forecast')
+      })
+    )
   }
 
 /**
@@ -293,51 +291,51 @@ export class FetchDataComponent implements OnInit, OnDestroy{
 
 
   deleteForecast(forecast){
-    console.log(forecast)
-
-    this.restService.deleteForecast(forecast.id).subscribe(resp => {
-      this.forecasts = this.removeAtIndex(this.forecasts, forecast.id)
-      this.showSuccess('Forecast deleted')
-    }, error => {
-      console.log(error)
-      this.showError('Error on deleting forecast')
-    })
-    
+    this.subscriptions.push(
+      this.restService.deleteForecast(forecast.id).subscribe(resp => {
+        this.forecasts = this.removeAtIndex(this.forecasts, forecast.id)
+        this.showSuccess('Forecast deleted')
+      }, error => {
+        console.log(error)
+        this.showError('Error on deleting forecast')
+      })
+    )
   }
 
   deleteCity(city){
-    this.restService.deleteCity(city.id).subscribe(resp => {
-      this.cities = this.removeAtIndex(this.cities, city.id)
-      this.showSuccess('City deleted')
-    }, error => {
-      console.log(error)
-      this.showError('Error on deleting city')
-    })
-    
+    this.subscriptions.push(
+      this.restService.deleteCity(city.id).subscribe(resp => {
+        this.cities = this.removeAtIndex(this.cities, city.id)
+        this.showSuccess('City deleted')
+      }, error => {
+        console.log(error)
+        this.showError('Error on deleting city')
+      })
+    )
   }
 
   deleteAllCities(){
-
-    this.restService.deleteAllCities().subscribe(resp => {
-      this.showSuccess("All cities deleted")
-      this.cities = []
-    },err => {
-      this.showError("Error on deleting cities")
-      console.log(err)
-    })
-  
+    this.subscriptions.push(
+      this.restService.deleteAllCities().subscribe(resp => {
+        this.showSuccess("All cities deleted")
+        this.cities = []
+      },err => {
+        this.showError("Error on deleting cities")
+        console.log(err)
+      })
+    )
   }
 
   deleteAllForecasts(){
-
-    this.restService.deleteAllForecasts().subscribe(resp => {
-      this.showSuccess("All forecasts deleted")
-      this.forecasts = []
-    }, err => {
-      this.showError("Error on deleting forecasts")
-      console.log(err)
-    })
-    
+    this.subscriptions.push(
+      this.restService.deleteAllForecasts().subscribe(resp => {
+        this.showSuccess("All forecasts deleted")
+        this.forecasts = []
+      }, err => {
+        this.showError("Error on deleting forecasts")
+        console.log(err)
+      })
+    )  
   }
 
   showSuccess(message) {

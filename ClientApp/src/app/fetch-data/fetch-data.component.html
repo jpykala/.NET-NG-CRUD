@@ -8,7 +8,7 @@
   <p-tabPanel header="Create New">
     <div class="p-formgroup-inline">
       <div class="p-field">
-        <label >Date</label>
+        <label>Date</label>
         <p-calendar [(ngModel)]="date" [showTime]="true" ></p-calendar>
       </div>
         <div class="p-field-radiobutton p-md-2">
@@ -26,8 +26,8 @@
     </div>
     <div class="p-formgroup-inline">
       <div class="p-field">
-        <label >City</label>
-        <p-dropdown style="margin-left:5px" [options]="cities" optionLabel="name" [(ngModel)]="selectedCity" optionDisabled="inactive" placeholder="Select"></p-dropdown>
+        <label>City</label>
+        <p-dropdown class="p-ml-2" [options]="cities" optionLabel="name" [(ngModel)]="selectedCity" optionDisabled="inactive" placeholder="Select"></p-dropdown>
         <button pButton (click)="op.toggle($event)" type="button" icon="pi pi-plus" iconPos="left"></button>
     
         <p-overlayPanel showCloseIcon="true" #op>
