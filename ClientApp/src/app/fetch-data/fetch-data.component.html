@@ -9,7 +9,7 @@
     <div class="p-formgroup-inline">
       <div class="p-field">
         <label>Date</label>
-        <p-calendar [(ngModel)]="date" [showTime]="true" ></p-calendar>
+        <p-calendar showTime="true" [(ngModel)]="date" ></p-calendar>
       </div>
         <div class="p-field-radiobutton p-md-2">
           <p-radioButton name="tempUnit" value="Celsius" [(ngModel)]="tempUnit" ></p-radioButton>
@@ -114,7 +114,7 @@
             <td pEditableColumn>
               <p-cellEditor>
                   <ng-template pTemplate="input">
-                    <p-calendar dateFormat="YYYY-MM-DD" showButtonBar="true" [ngModelOptions]="{standalone: true}"  appendTo="body" [(ngModel)]="forecast.date" [showTime]="true" ></p-calendar>
+                    <p-calendar showTime="true" showButtonBar="true" [ngModelOptions]="{standalone: true}"  appendTo="body" [(ngModel)]="forecast.date" ></p-calendar>
                   </ng-template>
                   <ng-template pTemplate="output">
                       {{forecast.date}}
@@ -177,7 +177,7 @@
   <p-tabPanel header="Statistics">
     <h3>Set filter values</h3>
     <p-dropdown [(ngModel)]="filterCity" [options]="cities" placholder="City"  optionValue="name" optionLabel="name" ></p-dropdown>
-    <p-calendar [(ngModel)]="rangeDates" [showTime]="true" placeholder="Date" selectionMode="range" [readonlyInput]="true" inputId="range" ></p-calendar>
+    <p-calendar [(ngModel)]="rangeDates" placeholder="Date" selectionMode="range" [readonlyInput]="true" inputId="range" ></p-calendar>
     <p-dropdown [(ngModel)]="filterUuc" [options]="uuc" placholder="Unit under consideration" optionValue="property" optionLabel="value"></p-dropdown>
     <button pButton label="Show" (click)="setChartData()"></button>
     <div class="card">
